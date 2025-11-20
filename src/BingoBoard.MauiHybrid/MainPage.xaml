@@ -4,6 +4,7 @@
              x:Class="BingoBoard.MauiHybrid.MainPage">
 
     <HybridWebView
-        x:Name="hybridWebView" />
+        x:Name="hybridWebView"
+        WebResourceRequested="OnWebResourceRequested" />
 
 </ContentPage>
