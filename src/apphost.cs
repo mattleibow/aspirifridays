@@ -6,8 +6,6 @@
 #:package Aspire.Hosting.SqlServer
 #:package Aspire.Hosting.JavaScript
 #:package Aspire.Hosting.Yarp
-#:package Aspire.Hosting.Maui
-#:package Aspire.Hosting.DevTunnels
 #:project ./BingoBoard.Admin
 #:project ./BingoBoard.MigrationService
 #:property UserSecretsId=aspire-samples-bingoboard
@@ -100,34 +98,5 @@ builder.AddYarp("bingoboard")
     })
     .WithExplicitStart();
 
-
-var publicDevTunnel = builder.AddDevTunnel("devtunnel-public")
-    .WithAnonymousAccess() // All ports on this tunnel default to allowing anonymous access
-    .WithReference(admin.GetEndpoint("https"));
-
-
-var mauiapp = builder.AddMauiProject("mauiapp", @"BingoBoard.MauiHybrid/BingoBoard.MauiHybrid.csproj");
-
-// Add iOS simulator with default simulator (uses running or default simulator)
-var ios = mauiapp.AddiOSSimulator()
-    .ExcludeFromManifest()
-    .WithOtlpDevTunnel() // Needed to get the OpenTelemetry data to "localhost"
-    .WithReference(admin, publicDevTunnel); // Needs a dev tunnel to reach "localhost"
-
-// Add Android emulator with default emulator (uses running or default emulator)
-mauiapp.AddAndroidEmulator()
-    .ExcludeFromManifest()
-    .WithOtlpDevTunnel() // Needed to get the OpenTelemetry data to "localhost"
-    .WithReference(admin, publicDevTunnel); // Needs a dev tunnel to reach "localhost"
-
-// Add Mac Catalyst desktop
-mauiapp.AddMacCatalystDevice()
-    .ExcludeFromManifest()
-    .WithReference(admin);
-
-// Add Windows desktop
-mauiapp.AddWindowsDevice()
-    .ExcludeFromManifest()
-    .WithReference(admin);
 
 builder.Build().Run();
