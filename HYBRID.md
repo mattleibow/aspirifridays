@@ -75,3 +75,29 @@ var publicDevTunnel = builder.AddDevTunnel("devtunnel-public")
         .ExcludeFromManifest()
         .WithReference(admin);
     ```
+
+### 4. Add the compiled JS app into the .NET MAUI app
+
+1.  Include the output from `vite build` into the app under the `ResourcesRaw\wwwroot` folder,
+    making sure to set the logical name to start at `wwwroot\`
+
+    ```xml
+    <!-- Link Vue app build output without copying -->
+    <MauiAsset
+        Include="..\bingo-board\dist\**"
+        Link="Resources\Raw\wwwroot\%(RecursiveDir)%(Filename)%(Extension)"
+        LogicalName="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" />
+    ```
+
+2.  Include the `<HybridWebView` control in the page, removing the existing XAML and C#
+    code from the page
+    ```xml
+    <HybridWebView
+        x:Name="hybridWebView" />
+    ```
+
+3.  Enable web developer tools in the `<HybridWebView>` for `DEBUG` builds
+
+    ```cs
+    builder.Services.AddHybridWebViewDeveloperTools();
+    ```
