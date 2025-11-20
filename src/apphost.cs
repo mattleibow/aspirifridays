@@ -6,6 +6,7 @@
 #:package Aspire.Hosting.SqlServer
 #:package Aspire.Hosting.JavaScript
 #:package Aspire.Hosting.Yarp
+#:package Aspire.Hosting.DevTunnels
 #:project ./BingoBoard.Admin
 #:project ./BingoBoard.MigrationService
 #:property UserSecretsId=aspire-samples-bingoboard
@@ -97,6 +98,12 @@ builder.AddYarp("bingoboard")
             }));
     })
     .WithExplicitStart();
+
+
+// Add a dev tunnel so devices and simulators can access the localhost
+var publicDevTunnel = builder.AddDevTunnel("devtunnel-public")
+    .WithAnonymousAccess() // All ports on this tunnel default to allowing anonymous access
+    .WithReference(admin.GetEndpoint("https"));
 
 
 builder.Build().Run();

@@ -23,3 +23,18 @@
     ```
     dotnet build src/BingoBoard.MauiHybrid
     ```
+
+### 2. (Optional) Add a public dev tunnel
+
+If we are wanting to target apps on devices or simulators, then we will need to
+set up a Dev Tunnel so that we can expose our localhost as an external HTTPS endpoint.
+
+This is needed because localhost on a device represents the _device's localhost_, not
+the host machine's localhost.
+
+```cs
+// Add a dev tunnel so devices and simulators can access the localhost
+var publicDevTunnel = builder.AddDevTunnel("devtunnel-public")
+    .WithAnonymousAccess() // All ports on this tunnel default to allowing anonymous access
+    .WithReference(admin.GetEndpoint("https"));
+```
