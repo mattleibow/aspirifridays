@@ -61,6 +61,8 @@
 	
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
+		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" />
 	</ItemGroup>
 

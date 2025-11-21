@@ -1,11 +1,15 @@
 ﻿using System.Text;
+using Microsoft.Extensions.ServiceDiscovery;
 
 namespace BingoBoard.MauiHybrid;
 
 public partial class MainPage : ContentPage
 {
-	public MainPage()
+	private readonly ServiceEndpointResolver _resolver;
+
+	public MainPage(ServiceEndpointResolver serviceEndpointResolver)
 	{
+		_resolver = serviceEndpointResolver;
 		InitializeComponent();
 	}
 
@@ -21,13 +25,18 @@ public partial class MainPage : ContentPage
 
 		async Task<Stream?> GetModifiedHtmlStreamAsync()
 		{
+			// Resolve the admin endpoint via service discovery
+			var endpoints = await _resolver.GetEndpointsAsync("https://boardadmin", default);
+			var endpoint = endpoints.Endpoints[0].EndPoint;
+
 			// Read the original HTML from the app package
 			using var stream = await FileSystem.OpenAppPackageFileAsync("wwwroot/index.html");
 			using var reader = new StreamReader(stream);
 			var originalHtml = await reader.ReadToEndAsync();
 
 			// Define the scripts to inject
-			const string newScripts = 
+			var newScripts = 
+				$"<script>window.BACKEND_CONFIG={{adminUrl:'{endpoint}'}};</script>" +
 				"<script src=\"_framework/hybridwebview.js\"></script>";
 
 			// Inject scripts as the first script in <head>

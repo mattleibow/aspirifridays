@@ -150,3 +150,73 @@ var publicDevTunnel = builder.AddDevTunnel("devtunnel-public")
         }
     }
     ```
+
+### 6. Inject the backend config
+
+When we run the bingo board web app, we can see the SignalR port is _the same_ as the
+web frontend, however, this is a result of a proxy that redirects to the admin backend
+which is set on an environment variable `services__boardadmin__http__0`.
+
+When we run the MAUI app, the web app assumes the proxy exists. We could update the
+web app to not use a proxy and instead use the admin port, but there is a better way.
+
+> !{NOTE]
+> We can test this but removing the `server: { ... }` config from the 
+> `src/bingo-board/vite.config.js` file. When the Aspire app is runnng, we can copy 
+> the URI from the Aspire dashboard into the
+> `src/bingo-board/services/signalrService.js` file so the hub URL is absolute.
+
+1.  Add the nuget packages to the MAUI app
+    ```xml
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
+    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" />
+    ```
+2.  Register the services in `MauiProgram.cs`
+    ```cs
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+
+    ...
+    
+    builder.Configuration.AddEnvironmentVariables();
+    builder.Services.AddServiceDiscovery();
+    ```
+3.  Fetch the `ServiceEndpointResolver` service in the `MainPage` constructor
+    ```cs
+    private readonly ServiceEndpointResolver _resolver;
+
+	public MainPage(ServiceEndpointResolver serviceEndpointResolver)
+	{
+		_resolver = serviceEndpointResolver;
+
+    ...
+    ```
+4.  Fetch the correct endpoint for the admin using the resolver
+    ```cs
+    async Task<Stream?> GetModifiedHtmlStreamAsync()
+    {
+        // Resolve the admin endpoint via service discovery
+        var endpoints = await _resolver.GetEndpointsAsync("https://boardadmin", default);
+        var endpoint = endpoints.Endpoints[0].EndPoint;
+
+    ...
+    ```
+
+5.  Pass the endpoint into the web view using script injection
+    ```cs
+    // Define the scripts to inject
+    var newScripts = 
+        $"<script>window.BACKEND_CONFIG={{adminUrl:'{endpoint}'}};</script>" +
+        "<script src=\"_framework/hybridwebview.js\"></script>";
+    ```
+
+6.  Update the `connect()` function in `src/bingo-board/services/signalrService.js`
+    ```js
+    let hubUrl = 'bingohub'; // Default relative URL for web
+
+    // If running in an environment with BACKEND_CONFIG, use that to set the hub URL
+    if (typeof window !== 'undefined' && window.BACKEND_CONFIG && window.BACKEND_CONFIG.adminUrl) {
+        const baseUrl = window.BACKEND_CONFIG.adminUrl.replace(/\/$/, '');
+        hubUrl = `${baseUrl}/bingohub`;
+    }
+    ```

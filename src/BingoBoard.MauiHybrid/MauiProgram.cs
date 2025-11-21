@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace BingoBoard.MauiHybrid;
 
@@ -14,6 +15,9 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
+
+		builder.Configuration.AddEnvironmentVariables();
+		builder.Services.AddServiceDiscovery();
 
 #if DEBUG
 		builder.Services.AddHybridWebViewDeveloperTools();

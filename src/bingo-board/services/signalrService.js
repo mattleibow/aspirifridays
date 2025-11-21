@@ -17,6 +17,12 @@ export class SignalRService {
     try {
       let hubUrl = 'bingohub'; // Default relative URL for web
 
+      // If running in an environment with BACKEND_CONFIG, use that to set the hub URL
+      if (typeof window !== 'undefined' && window.BACKEND_CONFIG && window.BACKEND_CONFIG.adminUrl) {
+        const baseUrl = window.BACKEND_CONFIG.adminUrl.replace(/\/$/, '');
+        hubUrl = `${baseUrl}/bingohub`;
+      }
+
       this.connection = new HubConnectionBuilder()
         .withUrl(hubUrl, {
           skipNegotiation: true,
