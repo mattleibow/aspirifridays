@@ -11,6 +11,7 @@ public partial class MainPage : ContentPage
 	{
 		_resolver = serviceEndpointResolver;
 		InitializeComponent();
+		hybridWebView.SetInvokeJavaScriptTarget(new JavaScriptTarget());
 	}
 
 	private async void OnNewBoardClicked(object sender, EventArgs e)
@@ -52,6 +53,25 @@ public partial class MainPage : ContentPage
 
 			// Return modified HTML
 			return new MemoryStream(Encoding.UTF8.GetBytes(modifiedHtml));
+		}
+	}
+
+	class JavaScriptTarget
+	{
+		// only public instance methods are avaiable to JavaScript
+		public async void DownloadBoard(string imageDataUrl)
+		{
+			// Write the image data to a file
+			var base64Data = imageDataUrl[(imageDataUrl.IndexOf(',') + 1)..];
+			var tempFile = Path.Combine(FileSystem.CacheDirectory, "bingo-board.png");
+			await File.WriteAllBytesAsync(tempFile, Convert.FromBase64String(base64Data));
+
+			// Share the file
+			await Share.Default.RequestAsync(new ShareFileRequest
+			{
+				Title = "AspiriFridays Bingo Board",
+				File = new ShareFile(tempFile)
+			});
 		}
 	}
 }

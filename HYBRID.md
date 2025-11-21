@@ -254,3 +254,44 @@ web app to not use a proxy and instead use the admin port, but there is a better
         await hybridWebView.InvokeJavaScriptAsync("window.bingoBoard.requestNewBoard");
     }
     ```
+
+### 8. Invoke C# from JavaScript
+
+1.  Invoke .NET code in `downloadCanvas` from `imageGenerator.js`
+    ```js
+    // Check if we're in a HybridWebView by looking for the HybridWebView object
+    if (typeof window.HybridWebView !== 'undefined') {
+        // In HybridWebView, ask the app to display the image
+        return new Promise((resolve, reject) => {
+            const data = canvas.toDataURL('image/png');
+            window.HybridWebView.InvokeDotNet('DownloadBoard', data);
+        });
+    }
+    ```
+
+2.  Create a "target" for the JavaScript function calls
+    ```cs
+    class JavaScriptTarget
+    {
+        // only public instance methods are avaiable to JavaScript
+        public async void DownloadBoard(string imageDataUrl)
+        {
+            // Write the image data to a file
+            var base64Data = imageDataUrl[(imageDataUrl.IndexOf(',') + 1)..];
+            var tempFile = Path.Combine(FileSystem.CacheDirectory, "bingo-board.png");
+            await File.WriteAllBytesAsync(tempFile, Convert.FromBase64String(base64Data));
+
+            // Share the file
+            await Share.Default.RequestAsync(new ShareFileRequest
+            {
+                Title = "AspiriFridays Bingo Board",
+                File = new ShareFile(tempFile)
+            });
+        }
+    }
+    ```
+
+3.  Register the target with the web view in `MainPage`
+    ```cs
+    hybridWebView.SetInvokeJavaScriptTarget(new JavaScriptTarget());
+    ```

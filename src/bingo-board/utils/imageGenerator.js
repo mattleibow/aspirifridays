@@ -256,6 +256,16 @@ export class BingoImageGenerator {
   }
 
   downloadCanvas(canvas) {
+    // Check if we're in a HybridWebView by looking for the HybridWebView object
+    if (typeof window.HybridWebView !== 'undefined') {
+      // In HybridWebView, ask the app to display the image
+      return new Promise((resolve, reject) => {
+        const data = canvas.toDataURL('image/png');
+        window.HybridWebView.InvokeDotNet('DownloadBoard', data);
+      });
+    }
+
+    // We are in a browser, so use the standard download method
     return new Promise((resolve, reject) => {
       canvas.toBlob((blob) => {
         if (!blob) {
