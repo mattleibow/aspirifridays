@@ -32,12 +32,18 @@ set up a Dev Tunnel so that we can expose our localhost as an external HTTPS end
 This is needed because localhost on a device represents the _device's localhost_, not
 the host machine's localhost.
 
-```cs
-// Add a dev tunnel so devices and simulators can access the localhost
-var publicDevTunnel = builder.AddDevTunnel("devtunnel-public")
-    .WithAnonymousAccess() // All ports on this tunnel default to allowing anonymous access
-    .WithReference(admin.GetEndpoint("https"));
-```
+1.  Add the package reference to `apphost.cs`
+    ```cs
+    #:package Aspire.Hosting.DevTunnels
+    ```
+
+2.  Add the dev tunnel
+    ```cs
+    // Add a dev tunnel so devices and simulators can access the localhost
+    var publicDevTunnel = builder.AddDevTunnel("devtunnel-public")
+        .WithAnonymousAccess() // All ports on this tunnel default to allowing anonymous access
+        .WithReference(admin.GetEndpoint("https"));
+    ```
 
 ### 3. Add the .NET MAUI app to the Aspire app host
 
