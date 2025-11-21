@@ -148,7 +148,7 @@ the host machine's localhost.
             var originalHtml = await reader.ReadToEndAsync();
 
             // Define the scripts to inject
-            const string newScripts = 
+            var newScripts = 
                 "<script src=\"_framework/hybridwebview.js\"></script>";
 
             // Inject scripts as the first script in <head>
