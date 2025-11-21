@@ -13,6 +13,12 @@ public partial class MainPage : ContentPage
 		InitializeComponent();
 	}
 
+	private async void OnNewBoardClicked(object sender, EventArgs e)
+	{
+		// Invoke the requestNewBoard function defined in the BingoBoard component
+		await hybridWebView.InvokeJavaScriptAsync("window.bingoBoard.requestNewBoard");
+	}
+
 	private void OnWebResourceRequested(object? sender, WebViewWebResourceRequestedEventArgs e)
 	{
 		// Intercept the root request to inject the HybridWebView script

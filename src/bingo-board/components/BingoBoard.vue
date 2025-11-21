@@ -560,9 +560,19 @@ export default {
   
   async mounted() {
     await this.initializeSignalR()
+    
+    // Expose requestNewBoard to the global window object for hybrid app access
+    window.bingoBoard = {
+      requestNewBoard: () => this.requestNewBoard()
+    }
   },
 
   async beforeUnmount() {
+    // Clean up global window object
+    if (window.bingoBoard) {
+      delete window.bingoBoard
+    }
+    
     // Clean up SignalR event listeners
     signalRService.removeEventListener('connectionStateChanged', this.onConnectionStateChanged)
     signalRService.removeEventListener('bingoSetReceived', this.onBingoSetReceived)

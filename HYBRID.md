@@ -185,9 +185,9 @@ web app to not use a proxy and instead use the admin port, but there is a better
     ```cs
     private readonly ServiceEndpointResolver _resolver;
 
-	public MainPage(ServiceEndpointResolver serviceEndpointResolver)
-	{
-		_resolver = serviceEndpointResolver;
+    public MainPage(ServiceEndpointResolver serviceEndpointResolver)
+    {
+        _resolver = serviceEndpointResolver;
 
     ...
     ```
@@ -218,5 +218,39 @@ web app to not use a proxy and instead use the admin port, but there is a better
     if (typeof window !== 'undefined' && window.BACKEND_CONFIG && window.BACKEND_CONFIG.adminUrl) {
         const baseUrl = window.BACKEND_CONFIG.adminUrl.replace(/\/$/, '');
         hubUrl = `${baseUrl}/bingohub`;
+    }
+    ```
+
+### 7. Invoke JavaScript from C#
+
+1.  Expose a `window.bingoBoard.requestNewBoard` function in `BingoBoard.vue`'s `mounted` function
+    ```js
+    // Expose requestNewBoard to the global window object for hybrid app access
+    window.bingoBoard = {
+        requestNewBoard: () => this.requestNewBoard()
+    }
+    ```
+
+2.  Clean up when the component is unloaded in the `beforeUnmount` function
+    ```js
+    // Clean up global window object
+    if (window.bingoBoard) {
+        delete window.bingoBoard
+    }
+    ```
+
+3.  Add a new toolbar item in `MainPage` XAML
+    ```xml
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="New Board" Clicked="OnNewBoardClicked" />
+    </ContentPage.ToolbarItems>
+    ```
+
+4.  In the code behind, invoke the JavaScript
+    ```cs
+    private async void OnNewBoardClicked(object sender, EventArgs e)
+    {
+        // Invoke the requestNewBoard function defined in the BingoBoard component
+        await hybridWebView.InvokeJavaScriptAsync("window.bingoBoard.requestNewBoard");
     }
     ```

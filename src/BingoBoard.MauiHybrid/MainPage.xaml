@@ -3,6 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BingoBoard.MauiHybrid.MainPage">
 
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="New Board" Clicked="OnNewBoardClicked" />
+    </ContentPage.ToolbarItems>
+
     <HybridWebView
         x:Name="hybridWebView"
         WebResourceRequested="OnWebResourceRequested" />
