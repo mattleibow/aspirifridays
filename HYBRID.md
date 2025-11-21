@@ -47,14 +47,19 @@ the host machine's localhost.
 
 ### 3. Add the .NET MAUI app to the Aspire app host
 
-1.  Add the initial .NET MAUI app resource builder to the app host
+1.  Add the package reference
+    ```cs
+    #:package Aspire.Hosting.Maui
+    ```
+
+2.  Add the initial .NET MAUI app resource builder to the app host
 
     ```cs
     // Add the .NET MAUI app builder
     var mauiapp = builder.AddMauiProject("mauiapp", @"BingoBoard.MauiHybrid/BingoBoard.MauiHybrid.csproj");
     ```
 
-2.  Add the desired mobile devices, remembering to use the dev tunnel
+3.  Add the desired mobile devices, remembering to use the dev tunnel
     ```cs
     // Add iOS simulator with default simulator (uses running or default simulator)
     var ios = mauiapp.AddiOSSimulator()
@@ -69,7 +74,7 @@ the host machine's localhost.
         .WithReference(admin, publicDevTunnel); // Needs a dev tunnel to reach "localhost"
     ```
 
-3.  Add the desired desktop devices
+4.  Add the desired desktop devices
     ```cs
     // Add Mac Catalyst desktop
     mauiapp.AddMacCatalystDevice()
