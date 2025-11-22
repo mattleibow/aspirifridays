@@ -5,6 +5,8 @@ using BingoBoard.Admin.Endpoints;
 using BingoBoard.Admin.Hubs;
 using BingoBoard.Admin.Services;
 using Scalar.AspNetCore;
+using BingoBoard.Data;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,37 +18,50 @@ var frontendURL = Environment.GetEnvironmentVariable("services__bingoboard__http
                   Environment.GetEnvironmentVariable("services__bingoboard__https__0") ??
                   "http+https://bingoboard"; // Fallback to hardcoded value if service discovery not available
 
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<IdentityRedirectManager>();
+builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
+// Add Auth services used by the Web app
 builder.Services.AddAuthentication(options =>
     {
-        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-    })
-    .AddIdentityCookies();
-builder.Services.AddAuthorization();
+        // Ensure that unauthenticated clients redirect to the login page rather than receive a 401 by default.
+        options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+    });
 
 // Configure OpenAPI support
 builder.Services.AddOpenApi();
+
 // Add validation support
 builder.Services.AddValidation();
 
 builder.AddApplicationDbContext();
 
-builder.Services.AddDefaultIdentity()
-    .AddSignInManager()
-    .AddDefaultTokenProviders();
+// Needed for external clients to log in
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>(options =>
+    {
+        options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
+
+        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequiredLength = 5;
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>();
+
 
 builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/login";
-    options.LogoutPath = "/logout";
-});
+    {
+        options.LoginPath = "/login";
+        options.LogoutPath = "/logout";
+    });
+
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-
-builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<RedirectManager>();
 
 // Add SignalR
 builder.Services.AddSignalR()
@@ -85,7 +100,7 @@ builder.Services.AddScoped(sp =>
 // Register background services
 builder.Services.AddHostedService<ApprovalCleanupService>();
 
-builder.Services.AddSingleton<AddressResolver>();
+builder.Services.AddScoped<IAddressResolver, AddressResolver>();
 
 // Add logging
 builder.Services.AddLogging();
@@ -119,15 +134,23 @@ app.UseAntiforgery();
 
 // Map Razor components
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+    .AddInteractiveServerRenderMode()
+    .AddAdditionalAssemblies(typeof(BingoBoard.Admin.Shared.Pages.Home).Assembly);
 
 // Map SignalR hub without authentication (anonymous access allowed)
 app.MapHub<BingoHub>("/bingohub");
+
+// Needed for external clients to log in
+app.MapGroup("/identity")
+    .MapIdentityApi<ApplicationUser>();
 
 // Map authentication endpoints
 app.MapAuthenticationEndpoints();
 
 // Map bingo square CRUD endpoints
 app.MapBingoSquareCrudEndpoints();
+
+// Map bingo client management endpoints
+app.MapBingoClientEndpoints();
 
 app.Run();

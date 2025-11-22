@@ -1,9 +1,10 @@
 @page "/account"
+@attribute [ExcludeFromInteractiveRouting]
 @using System.Buffers.Text
 @attribute [Authorize]
 
 @inject NavigationManager Navigation
-@inject RedirectManager Redirect
+@inject IdentityRedirectManager Redirect
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 

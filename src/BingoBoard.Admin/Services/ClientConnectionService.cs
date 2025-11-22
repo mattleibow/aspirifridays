@@ -1,6 +1,7 @@
 using BingoBoard.Admin.Models;
 using BingoBoard.Admin.Services;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace BingoBoard.Admin.Services;

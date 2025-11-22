@@ -1,9 +1,14 @@
 @page "/login"
-@attribute [ExcludeFromInteractiveRouting]
+@using BingoBoard.Admin.MauiHybrid.Endpoints
 @using Microsoft.AspNetCore.Components.Forms
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.Extensions.Logging
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
+
+@inject ILogger<Login> Logger
+@inject ISignInManager SignInManager
+@inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Admin Login</PageTitle>
 
@@ -16,7 +21,7 @@
         </div>
         
         <div class="login-section">
-            <form method="post" action="/auth/login">
+            <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
                 <AntiforgeryToken />
                 @if (!string.IsNullOrEmpty(errorMessage))
                 {
@@ -30,6 +35,7 @@
                         <i class="fas fa-lock"></i> Password
                     </label>
                     <input id="password" name="password" type="password"
+                           @bind="Input.Password"
                            class="form-control form-control-lg" 
                            placeholder="Enter admin password" 
                            autocomplete="current-password webauthn"
@@ -41,6 +47,7 @@
                     <span>Sign In with Password</span>
                 </button>
                 
+                @*
                 <div class="divider">
                     <span>OR</span>
                 </div>
@@ -49,7 +56,8 @@
                     <i class="fas fa-fingerprint me-2"></i>
                     <span>Sign In with Passkey</span>
                 </PasskeySubmit>
-            </form>
+                *@
+            </EditForm>
         </div>
         
         <div class="info-section">
@@ -63,20 +71,55 @@
 </div>
 
 @code {
-    private string errorMessage = string.Empty;
-    
+    private string? errorMessage;
+    private EditContext editContext = default!;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = default!;
+
     [SupplyParameterFromQuery]
-    public string? Error { get; set; }
-    
-    protected override void OnInitialized()
+    private string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
     {
-        errorMessage = Error switch
+        Input ??= new();
+
+        editContext = new EditContext(Input);
+    }
+
+    public async Task LoginUser()
+    {
+        // If doing a password sign-in, validate the form.
+        if (!editContext.Validate())
         {
-            "invalid" => "Invalid password. Please try again.",
-            "no-user" => "The user does not exist.",
-            "passkey-error" => "Passkey authentication failed. Please try again.",
-            _ => "",
-        };
+            return;
+        }
+
+        var status = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe);
+
+        if (status.Succeeded)
+        {
+            Logger.LogInformation("User logged in.");
+            RedirectManager.RedirectTo(ReturnUrl);
+        }
+        else
+        {
+            errorMessage = "Error: Invalid login attempt.";
+        }
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "admin";
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
     }
 }
 

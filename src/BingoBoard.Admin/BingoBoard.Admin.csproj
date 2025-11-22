@@ -19,6 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BingoBoard.ServiceDefaults\BingoBoard.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\BingoBoard.Admin.Shared\BingoBoard.Admin.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Data\**\*">

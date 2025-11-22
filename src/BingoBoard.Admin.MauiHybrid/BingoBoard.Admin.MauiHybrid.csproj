@@ -61,10 +61,14 @@
     <PackageReference Include="Microsoft.Maui.Controls" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BingoBoard.Admin.Shared\BingoBoard.Admin.Shared.csproj" />
+    <ProjectReference Include="..\BingoBoard.MauiServiceDefaults\BingoBoard.MauiServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

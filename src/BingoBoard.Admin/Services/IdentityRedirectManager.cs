@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace BingoBoard.Admin.Services;
 
-internal sealed class RedirectManager(NavigationManager navigationManager)
+internal sealed class IdentityRedirectManager(NavigationManager navigationManager)
 {
     public const string StatusCookieName = "BingoBoard.StatusMessage";
 

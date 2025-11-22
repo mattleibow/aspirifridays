@@ -1,17 +1,11 @@
-using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Components;
 
-class AddressResolver(IServer server)
+namespace BingoBoard.Admin.Services;
+
+/// <summary>
+/// AddressResolver for the web app - resolves relative paths to absolute URLs
+/// </summary>
+class AddressResolver(NavigationManager navigationManager) : IAddressResolver
 {
-    public string Address { get; } = GetAddress(server);
-
-    private static string GetAddress(IServer server)
-    {
-        var port = (from a in server.Features.Get<IServerAddressesFeature>()?.Addresses ?? []
-                    let binding = BindingAddress.Parse(a)
-                    where binding.Scheme == "http"
-                    select binding.Port)
-                        .First();
-        return $"http://localhost:{port}/bingohub";
-    }
+    public string Resolve(string path) => navigationManager.ToAbsoluteUri(path).ToString();
 }

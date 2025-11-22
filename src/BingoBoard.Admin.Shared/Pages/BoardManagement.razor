@@ -1,13 +1,15 @@
 @page "/board-management"
-@rendermode InteractiveServer
 @attribute [Authorize]
-@using BingoBoard.Admin.Endpoints
+@using BingoBoard.Admin.Models
+@using BingoBoard.Admin.Services
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.SignalR.Client
 @using System.ComponentModel.DataAnnotations
 @inject IBingoService BingoService
 @inject IBingoSquareService BingoSquareService
 @inject IJSRuntime JSRuntime
-@inject AddressResolver AddressResolver
+@inject IAddressResolver AddressResolver
+@inject IHttpMessageHandlerFactory HttpMessageHandlerFactory
 @implements IAsyncDisposable
 
 <PageTitle>Board Management - Bingo Admin</PageTitle>
@@ -512,7 +514,7 @@
     {
         // Initialize SignalR connection
         hubConnection = new HubConnectionBuilder()
-            .WithUrl(AddressResolver.Address)
+            .WithUrl(AddressResolver.Resolve("/bingohub"), HttpMessageHandlerFactory)
             .Build();
 
         // Set up event handlers

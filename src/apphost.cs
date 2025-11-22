@@ -111,7 +111,7 @@ var publicDevTunnel = builder.AddDevTunnel("devtunnel-public")
 var mauiapp = builder.AddMauiProject("mauiapp", @"BingoBoard.MauiHybrid/BingoBoard.MauiHybrid.csproj");
 
 // Add iOS simulator with default simulator (uses running or default simulator)
-var ios = mauiapp.AddiOSSimulator()
+mauiapp.AddiOSSimulator()
     .ExcludeFromManifest()
     .WithOtlpDevTunnel() // Needed to get the OpenTelemetry data to "localhost"
     .WithReference(admin, publicDevTunnel); // Needs a dev tunnel to reach "localhost"
@@ -129,6 +129,32 @@ mauiapp.AddMacCatalystDevice()
 
 // Add Windows desktop
 mauiapp.AddWindowsDevice()
+    .ExcludeFromManifest()
+    .WithReference(admin);
+
+
+// Add the .NET MAUI app builder
+var mauiadminapp = builder.AddMauiProject("mauiadminapp", @"BingoBoard.Admin.MauiHybrid/BingoBoard.Admin.MauiHybrid.csproj");
+
+// Add iOS simulator with default simulator (uses running or default simulator)
+mauiadminapp.AddiOSSimulator()
+    .ExcludeFromManifest()
+    .WithOtlpDevTunnel() // Needed to get the OpenTelemetry data to "localhost"
+    .WithReference(admin, publicDevTunnel); // Needs a dev tunnel to reach "localhost"
+
+// Add Android emulator with default emulator (uses running or default emulator)
+mauiadminapp.AddAndroidEmulator()
+    .ExcludeFromManifest()
+    .WithOtlpDevTunnel() // Needed to get the OpenTelemetry data to "localhost"
+    .WithReference(admin, publicDevTunnel); // Needs a dev tunnel to reach "localhost"
+
+// Add Mac Catalyst desktop
+mauiadminapp.AddMacCatalystDevice()
+    .ExcludeFromManifest()
+    .WithReference(admin);
+
+// Add Windows desktop
+mauiadminapp.AddWindowsDevice()
     .ExcludeFromManifest()
     .WithReference(admin);
 
